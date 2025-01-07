@@ -88,6 +88,7 @@ const client = new MultimodalLiveClient();
 // Language translations
 const translations = {
     en: {
+        title: "Gemini 2.0 Flash Multimodal Live API Client",
         apiKeyPlaceholder: "Please Input Gemini API Key",
         soundLabel: "Sound:",
         responseTypeLabel: "Response Type:",
@@ -101,9 +102,36 @@ const translations = {
         sendButton: "Send",
         inputAudioLabel: "Input Audio",
         outputAudioLabel: "Output Audio",
-        stopVideo: "Stop Video"
+        stopVideo: "Stop Video",
+        voiceOptions: {
+            puckMale: "Puck (Male)",
+            charonMale: "Charon (Male)",
+            fenrirMale: "Fenrir (Male)",
+            koreFemale: "Kore (Female)",
+            aoedeFemale: "Aoede (Female)"
+        },
+        responseTypes: {
+            text: "Text",
+            audio: "Audio"
+        },
+        systemMessages: {
+            micStarted: "Microphone started",
+            micStopped: "Microphone stopped",
+            pleaseInputKey: "Please input API Key",
+            connected: "Connected to Gemini 2.0 Flash Multimodal Live API",
+            disconnected: "Disconnected from server",
+            wsOpened: "WebSocket connection opened",
+            wsClosed: "WebSocket connection closed (code {code})",
+            setupComplete: "Setup complete",
+            turnComplete: "Turn complete",
+            cameraStarted: "Camera started",
+            cameraStopped: "Camera stopped",
+            screenStarted: "Screen sharing started",
+            screenStopped: "Screen sharing stopped"
+        }
     },
     zh: {
+        title: "Gemini 2.0 实时多模态API客户端",
         apiKeyPlaceholder: "请输入Gemini API密钥",
         soundLabel: "声音：",
         responseTypeLabel: "响应类型：",
@@ -117,7 +145,33 @@ const translations = {
         sendButton: "发送",
         inputAudioLabel: "输入音频",
         outputAudioLabel: "输出音频",
-        stopVideo: "停止视频"
+        stopVideo: "停止视频",
+        voiceOptions: {
+            puckMale: "帕克（男声）",
+            charonMale: "卡戎（男声）",
+            fenrirMale: "芬里尔（男声）",
+            koreFemale: "科瑞（女声）",
+            aoedeFemale: "奥伊德（女声）"
+        },
+        responseTypes: {
+            text: "文本",
+            audio: "音频"
+        },
+        systemMessages: {
+            micStarted: "麦克风已启动",
+            micStopped: "麦克风已停止",
+            pleaseInputKey: "请输入API密钥",
+            connected: "已连接到Gemini 2.0实时多模态API",
+            disconnected: "已断开服务器连接",
+            wsOpened: "WebSocket连接已打开",
+            wsClosed: "WebSocket连接已关闭（代码：{code}）",
+            setupComplete: "设置完成",
+            turnComplete: "回合完成",
+            cameraStarted: "相机已启动",
+            cameraStopped: "相机已停止",
+            screenStarted: "屏幕共享已启动",
+            screenStopped: "屏幕共享已停止"
+        }
     }
 };
 
@@ -127,7 +181,10 @@ let currentLang = 'en';
 function updateUILanguage() {
     const t = translations[currentLang];
     
-    // Update placeholders and text content
+    // 更新页面标题
+    document.title = t.title;
+    
+    // 更新基本UI元素
     apiKeyInput.placeholder = t.apiKeyPlaceholder;
     document.querySelector('.setting-label:nth-child(1)').textContent = t.soundLabel;
     document.querySelector('.setting-label:nth-child(2)').textContent = t.responseTypeLabel;
@@ -140,6 +197,19 @@ function updateUILanguage() {
     sendButton.textContent = t.sendButton;
     document.querySelector('.visualizer-container:nth-child(1) label').textContent = t.inputAudioLabel;
     document.querySelector('.visualizer-container:nth-child(2) label').textContent = t.outputAudioLabel;
+    
+    // 更新下拉选项
+    const voiceOptions = voiceSelect.options;
+    voiceOptions[0].text = t.voiceOptions.puckMale;
+    voiceOptions[1].text = t.voiceOptions.charonMale;
+    voiceOptions[2].text = t.voiceOptions.fenrirMale;
+    voiceOptions[3].text = t.voiceOptions.koreFemale;
+    voiceOptions[4].text = t.voiceOptions.aoedeFemale;
+
+    const responseOptions = responseTypeSelect.options;
+    responseOptions[0].text = t.responseTypes.text;
+    responseOptions[1].text = t.responseTypes.audio;
+
     if (document.getElementById('stop-video')) {
         document.getElementById('stop-video').textContent = t.stopVideo;
     }
@@ -162,6 +232,21 @@ updateUILanguage();
  * @param {string} [type='system'] - The type of the message (system, user, ai).
  */
 function logMessage(message, type = 'system') {
+    const t = translations[currentLang];
+    let displayMessage = message;
+
+    // 如果是系统消息，尝试翻译
+    if (type === 'system' && t.systemMessages) {
+        const systemMessages = t.systemMessages;
+        // 遍历所有系统消息，查找匹配项
+        for (const [key, value] of Object.entries(systemMessages)) {
+            if (message.includes(translations.en.systemMessages[key])) {
+                displayMessage = value;
+                break;
+            }
+        }
+    }
+
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
 
@@ -186,7 +271,7 @@ function logMessage(message, type = 'system') {
     logEntry.appendChild(emoji);
 
     const messageText = document.createElement('span');
-    messageText.textContent = message;
+    messageText.textContent = displayMessage;
     logEntry.appendChild(messageText);
 
     logsContainer.appendChild(logEntry);
