@@ -85,6 +85,77 @@ let isUsingTool = false;
 // Multimodal Client
 const client = new MultimodalLiveClient();
 
+// Language translations
+const translations = {
+    en: {
+        apiKeyPlaceholder: "Please Input Gemini API Key",
+        soundLabel: "Sound:",
+        responseTypeLabel: "Response Type:",
+        videoFPSLabel: "Video FPS:",
+        fpsHelp: "Higher FPS need more network bandwidth",
+        systemInstructionPlaceholder: "Enter custom system instructions...",
+        confirmButton: "Confirm",
+        connectButton: "Connect",
+        disconnectButton: "Disconnect",
+        messageInputPlaceholder: "Enter message...",
+        sendButton: "Send",
+        inputAudioLabel: "Input Audio",
+        outputAudioLabel: "Output Audio",
+        stopVideo: "Stop Video"
+    },
+    zh: {
+        apiKeyPlaceholder: "请输入Gemini API密钥",
+        soundLabel: "声音：",
+        responseTypeLabel: "响应类型：",
+        videoFPSLabel: "视频帧率：",
+        fpsHelp: "更高的帧率需要更多的网络带宽",
+        systemInstructionPlaceholder: "输入自定义系统指令...",
+        confirmButton: "确认",
+        connectButton: "连接",
+        disconnectButton: "断开连接",
+        messageInputPlaceholder: "输入消息...",
+        sendButton: "发送",
+        inputAudioLabel: "输入音频",
+        outputAudioLabel: "输出音频",
+        stopVideo: "停止视频"
+    }
+};
+
+let currentLang = 'en';
+
+// Update UI text based on selected language
+function updateUILanguage() {
+    const t = translations[currentLang];
+    
+    // Update placeholders and text content
+    apiKeyInput.placeholder = t.apiKeyPlaceholder;
+    document.querySelector('.setting-label:nth-child(1)').textContent = t.soundLabel;
+    document.querySelector('.setting-label:nth-child(2)').textContent = t.responseTypeLabel;
+    document.querySelector('.setting-label:nth-child(3)').textContent = t.videoFPSLabel;
+    document.querySelector('.fps-help').textContent = t.fpsHelp;
+    systemInstructionInput.placeholder = t.systemInstructionPlaceholder;
+    applyConfigButton.textContent = t.confirmButton;
+    connectButton.textContent = isConnected ? t.disconnectButton : t.connectButton;
+    messageInput.placeholder = t.messageInputPlaceholder;
+    sendButton.textContent = t.sendButton;
+    document.querySelector('.visualizer-container:nth-child(1) label').textContent = t.inputAudioLabel;
+    document.querySelector('.visualizer-container:nth-child(2) label').textContent = t.outputAudioLabel;
+    if (document.getElementById('stop-video')) {
+        document.getElementById('stop-video').textContent = t.stopVideo;
+    }
+}
+
+// Language toggle button click handler
+const langToggleButton = document.getElementById('lang-toggle');
+langToggleButton.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    updateUILanguage();
+    langToggleButton.classList.toggle('active');
+});
+
+// Initial language setup
+updateUILanguage();
+
 /**
  * Logs a message to the UI.
  * @param {string} message - The message to log.
