@@ -42,7 +42,10 @@ const savedApiKey = localStorage.getItem('gemini_api_key');
 const savedVoice = localStorage.getItem('gemini_voice');
 const savedFPS = localStorage.getItem('video_fps');
 const savedSystemInstruction = localStorage.getItem('system_instruction');
+const savedLanguage = localStorage.getItem('preferred_language');
 
+// 设置初始语言
+let currentLang = savedLanguage || 'zh'; // 默认使用中文
 
 if (savedApiKey) {
     apiKeyInput.value = savedApiKey;
@@ -127,7 +130,17 @@ const translations = {
             cameraStarted: "Camera started",
             cameraStopped: "Camera stopped",
             screenStarted: "Screen sharing started",
-            screenStopped: "Screen sharing stopped"
+            screenStopped: "Screen sharing stopped",
+            modelInterrupted: "Model interrupted",
+            errorProcessingAudio: "Error processing audio",
+            connectionError: "Connection error",
+            serverError: "Server error",
+            applicationError: "Application error",
+            unexpectedError: "Unexpected error"
+        },
+        labels: {
+            inputAudio: "Input Audio",
+            outputAudio: "Output Audio"
         }
     },
     zh: {
@@ -170,61 +183,54 @@ const translations = {
             cameraStarted: "相机已启动",
             cameraStopped: "相机已停止",
             screenStarted: "屏幕共享已启动",
-            screenStopped: "屏幕共享已停止"
+            screenStopped: "屏幕共享已停止",
+            modelInterrupted: "模型已中断",
+            errorProcessingAudio: "处理音频时出错",
+            connectionError: "连接错误",
+            serverError: "服务器错误",
+            applicationError: "应用程序错误",
+            unexpectedError: "意外错误"
+        },
+        labels: {
+            inputAudio: "输入音频",
+            outputAudio: "输出音频"
         }
     }
 };
-
-let currentLang = 'en';
-
-// Update UI text based on selected language
-function updateUILanguage() {
-    const t = translations[currentLang];
-    
-    // 更新页面标题
-    document.title = t.title;
-    
-    // 更新基本UI元素
-    apiKeyInput.placeholder = t.apiKeyPlaceholder;
-    document.querySelector('.setting-label:nth-child(1)').textContent = t.soundLabel;
-    document.querySelector('.setting-label:nth-child(2)').textContent = t.responseTypeLabel;
-    document.querySelector('.setting-label:nth-child(3)').textContent = t.videoFPSLabel;
-    document.querySelector('.fps-help').textContent = t.fpsHelp;
-    systemInstructionInput.placeholder = t.systemInstructionPlaceholder;
-    applyConfigButton.textContent = t.confirmButton;
-    connectButton.textContent = isConnected ? t.disconnectButton : t.connectButton;
-    messageInput.placeholder = t.messageInputPlaceholder;
-    sendButton.textContent = t.sendButton;
-    document.querySelector('.visualizer-container:nth-child(1) label').textContent = t.inputAudioLabel;
-    document.querySelector('.visualizer-container:nth-child(2) label').textContent = t.outputAudioLabel;
-    
-    // 更新下拉选项
-    const voiceOptions = voiceSelect.options;
-    voiceOptions[0].text = t.voiceOptions.puckMale;
-    voiceOptions[1].text = t.voiceOptions.charonMale;
-    voiceOptions[2].text = t.voiceOptions.fenrirMale;
-    voiceOptions[3].text = t.voiceOptions.koreFemale;
-    voiceOptions[4].text = t.voiceOptions.aoedeFemale;
-
-    const responseOptions = responseTypeSelect.options;
-    responseOptions[0].text = t.responseTypes.text;
-    responseOptions[1].text = t.responseTypes.audio;
-
-    if (document.getElementById('stop-video')) {
-        document.getElementById('stop-video').textContent = t.stopVideo;
-    }
-}
 
 // Language toggle button click handler
 const langToggleButton = document.getElementById('lang-toggle');
 langToggleButton.addEventListener('click', () => {
     currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('preferred_language', currentLang); // 保存语言偏好
     updateUILanguage();
     langToggleButton.classList.toggle('active');
 });
 
 // Initial language setup
 updateUILanguage();
+
+// 更新系统指令的默认文本
+const defaultSystemInstructions = {
+    en: "You are my helpful assistant. You can see and hear me, and respond with voice and text. If you are asked about things you do not know, you can use the google search tool to find the answer.",
+    zh: "你是我的智能助手。你可以看到和听到我，并且可以用语音和文字回应。如果被问到你不知道的事情，你可以使用谷歌搜索工具来寻找答案。"
+};
+
+// 根据当前语言设置系统指令
+function updateSystemInstruction() {
+    if (!systemInstructionInput.value) {
+        systemInstructionInput.value = defaultSystemInstructions[currentLang];
+        CONFIG.SYSTEM_INSTRUCTION.TEXT = defaultSystemInstructions[currentLang];
+    }
+}
+
+// 在语言切换时更新系统指令
+langToggleButton.addEventListener('click', () => {
+    updateSystemInstruction();
+});
+
+// 初始化时设置系统指令
+updateSystemInstruction();
 
 /**
  * Logs a message to the UI.
@@ -711,4 +717,44 @@ function stopScreenSharing() {
 
 screenButton.addEventListener('click', handleScreenShare);
 screenButton.disabled = true;
+
+// Update UI text based on selected language
+function updateUILanguage() {
+    const t = translations[currentLang];
+    
+    // 更新页面标题
+    document.title = t.title;
+    
+    // 更新基本UI元素
+    apiKeyInput.placeholder = t.apiKeyPlaceholder;
+    document.querySelector('.setting-label:nth-child(1)').textContent = t.soundLabel;
+    document.querySelector('.setting-label:nth-child(2)').textContent = t.responseTypeLabel;
+    document.querySelector('.setting-label:nth-child(3)').textContent = t.videoFPSLabel;
+    document.querySelector('.fps-help').textContent = t.fpsHelp;
+    systemInstructionInput.placeholder = t.systemInstructionPlaceholder;
+    applyConfigButton.textContent = t.confirmButton;
+    connectButton.textContent = isConnected ? t.disconnectButton : t.connectButton;
+    messageInput.placeholder = t.messageInputPlaceholder;
+    sendButton.textContent = t.sendButton;
+    
+    // 更新音频标签
+    document.querySelector('.visualizer-container:nth-child(1) label').textContent = t.labels.inputAudio;
+    document.querySelector('.visualizer-container:nth-child(2) label').textContent = t.labels.outputAudio;
+    
+    // 更新下拉选项
+    const voiceOptions = voiceSelect.options;
+    voiceOptions[0].text = t.voiceOptions.puckMale;
+    voiceOptions[1].text = t.voiceOptions.charonMale;
+    voiceOptions[2].text = t.voiceOptions.fenrirMale;
+    voiceOptions[3].text = t.voiceOptions.koreFemale;
+    voiceOptions[4].text = t.voiceOptions.aoedeFemale;
+
+    const responseOptions = responseTypeSelect.options;
+    responseOptions[0].text = t.responseTypes.text;
+    responseOptions[1].text = t.responseTypes.audio;
+
+    if (document.getElementById('stop-video')) {
+        document.getElementById('stop-video').textContent = t.stopVideo;
+    }
+}
   
