@@ -727,34 +727,80 @@ function updateUILanguage() {
     
     // 更新基本UI元素
     apiKeyInput.placeholder = t.apiKeyPlaceholder;
-    document.querySelector('.setting-label:nth-child(1)').textContent = t.soundLabel;
-    document.querySelector('.setting-label:nth-child(2)').textContent = t.responseTypeLabel;
-    document.querySelector('.setting-label:nth-child(3)').textContent = t.videoFPSLabel;
-    document.querySelector('.fps-help').textContent = t.fpsHelp;
+
+    // 更新所有设置标签
+    const settingLabels = document.querySelectorAll('.setting-container .setting-label');
+    settingLabels.forEach((label, index) => {
+        switch(index) {
+            case 0:
+                label.textContent = t.soundLabel;
+                break;
+            case 1:
+                label.textContent = t.responseTypeLabel;
+                break;
+            case 2:
+                label.textContent = t.videoFPSLabel;
+                break;
+        }
+    });
+
+    // 更新帮助文本
+    const fpsHelp = document.querySelector('.fps-help');
+    if (fpsHelp) {
+        fpsHelp.textContent = t.fpsHelp;
+    }
+
+    // 更新系统指令输入框
     systemInstructionInput.placeholder = t.systemInstructionPlaceholder;
+
+    // 更新按钮文本
     applyConfigButton.textContent = t.confirmButton;
     connectButton.textContent = isConnected ? t.disconnectButton : t.connectButton;
-    messageInput.placeholder = t.messageInputPlaceholder;
     sendButton.textContent = t.sendButton;
-    
+
+    // 更新输入框占位符
+    messageInput.placeholder = t.messageInputPlaceholder;
+
     // 更新音频标签
-    document.querySelector('.visualizer-container:nth-child(1) label').textContent = t.labels.inputAudio;
-    document.querySelector('.visualizer-container:nth-child(2) label').textContent = t.labels.outputAudio;
-    
-    // 更新下拉选项
-    const voiceOptions = voiceSelect.options;
-    voiceOptions[0].text = t.voiceOptions.puckMale;
-    voiceOptions[1].text = t.voiceOptions.charonMale;
-    voiceOptions[2].text = t.voiceOptions.fenrirMale;
-    voiceOptions[3].text = t.voiceOptions.koreFemale;
-    voiceOptions[4].text = t.voiceOptions.aoedeFemale;
-
-    const responseOptions = responseTypeSelect.options;
-    responseOptions[0].text = t.responseTypes.text;
-    responseOptions[1].text = t.responseTypes.audio;
-
-    if (document.getElementById('stop-video')) {
-        document.getElementById('stop-video').textContent = t.stopVideo;
+    const audioLabels = document.querySelectorAll('.visualizer-container label');
+    if (audioLabels.length >= 2) {
+        audioLabels[0].textContent = t.labels.inputAudio;
+        audioLabels[1].textContent = t.labels.outputAudio;
     }
+
+    // 更新下拉选项 - 声音选择
+    const voiceOptions = voiceSelect.options;
+    if (voiceOptions.length >= 5) {
+        voiceOptions[0].text = t.voiceOptions.puckMale;
+        voiceOptions[1].text = t.voiceOptions.charonMale;
+        voiceOptions[2].text = t.voiceOptions.fenrirMale;
+        voiceOptions[3].text = t.voiceOptions.koreFemale;
+        voiceOptions[4].text = t.voiceOptions.aoedeFemale;
+    }
+
+    // 更新下拉选项 - 响应类型
+    const responseOptions = responseTypeSelect.options;
+    if (responseOptions.length >= 2) {
+        responseOptions[0].text = t.responseTypes.text;
+        responseOptions[1].text = t.responseTypes.audio;
+    }
+
+    // 更新视频停止按钮
+    const stopVideoBtn = document.getElementById('stop-video');
+    if (stopVideoBtn) {
+        stopVideoBtn.textContent = t.stopVideo;
+    }
+
+    // 更新输入输出音频标签
+    const inputAudioLabel = document.querySelector('.visualizer-container:nth-child(1) label');
+    const outputAudioLabel = document.querySelector('.visualizer-container:nth-child(2) label');
+    if (inputAudioLabel) inputAudioLabel.textContent = t.labels.inputAudio;
+    if (outputAudioLabel) outputAudioLabel.textContent = t.labels.outputAudio;
 }
+
+// 确保在DOM加载完成后执行初始化
+document.addEventListener('DOMContentLoaded', () => {
+    updateUILanguage();
+    updateSystemInstruction();
+});
   
